@@ -1,0 +1,30 @@
+name: VibeSec Scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Build VibeSec
+        run: go build -o vibesec .
+
+      - name: Run scan (CI gate)
+        run: |
+          ./vibesec scan https://staging.example.com --json --ci | tee scan-summary.json
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vibesec-reports
+          path: reports/

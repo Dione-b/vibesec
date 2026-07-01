@@ -1,0 +1,21 @@
+vibesec
+bin/
+*.exe
+reports/*
+!reports/.gitkeep
+vibesec.db
+vibesec.db-*
+
+# secrets & local env
+.env
+.env.*
+*.pem
+*.key
+
+# caches & tooling
+*.log
+coverage.out
+.DS_Store
+.idea/
+.vscode/
+.cursor/

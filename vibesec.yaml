@@ -1,0 +1,57 @@
+threads: 20
+timeout: 10
+
+http:
+  user_agent: VibeSec/0.1
+  max_redirects: 10
+  retries: 3
+  retry_backoff_ms: 500
+
+report:
+  format:
+    - markdown
+    - json
+    - html
+
+modules:
+  fingerprint: true
+  bundle: true
+  endpoints: true
+  headers: true
+  cors: true
+  csp: true
+  auth: true
+  authorization: true
+  plugins: true
+  nuclei: true
+  burp: true
+  correlation: true
+  ai: true
+  report: true
+
+plugins:
+  enabled: true
+  httpx: true
+  nmap: true
+  katana: true
+  subfinder: true
+  naabu: true
+  dnsx: true
+
+nuclei:
+  enabled: true
+  severity:
+    - critical
+    - high
+    - medium
+    - low
+  rate_limit: 50
+
+burp:
+  enabled: true
+  # file: examples/burp-issues.xml
+
+enterprise:
+  database: vibesec.db
+  api_listen: ":8080"
+  persist_scans: true

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues burpVersion="2024.1" exportTime="2026-07-01 12:00:00">
+  <issue>
+    <name>Cookie without Secure flag</name>
+    <severity>Medium</severity>
+    <confidence>Certain</confidence>
+    <host>https://escritha.com</host>
+    <path>/</path>
+    <location>https://escritha.com/</location>
+    <issueDetail>The escritha_session cookie is set without the Secure attribute.</issueDetail>
+    <remediationBackground>Set the Secure attribute on cookies transmitted over HTTPS.</remediationBackground>
+  </issue>
+  <issue>
+    <name>Content security policy: not enforced</name>
+    <severity>High</severity>
+    <confidence>Firm</confidence>
+    <host>https://escritha.com</host>
+    <path>/</path>
+    <location>https://escritha.com/</location>
+    <issueDetail>No Content-Security-Policy header was observed.</issueDetail>
+    <remediationBackground>Configure a Content-Security-Policy header.</remediationBackground>
+  </issue>
+</issues>

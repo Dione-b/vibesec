@@ -1,0 +1,16 @@
+/
+/api
+/api/v1
+/admin
+/login
+/logout
+/register
+/users
+/health
+/dashboard
+/graphql
+/swagger
+/openapi.json
+/robots.txt
+/.well-known/security.txt
+/sitemap.xml
