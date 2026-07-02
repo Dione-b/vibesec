@@ -272,16 +272,37 @@ func scanUser(row interface{ Scan(dest ...any) error }) (*User, error) {
 
 func scanScan(row interface{ Scan(dest ...any) error }) (*Scan, error) {
 	var item Scan
+	var riskLevel, reportMarkdown, reportJSON, reportHTML, documentJSON, errorMessage sql.NullString
 	var created, finished sql.NullString
 	if err := row.Scan(
-		&item.ID, &item.UserID, &item.Target, &item.Status, &item.RiskLevel,
+		&item.ID, &item.UserID, &item.Target, &item.Status, &riskLevel,
 		&item.FindingCount, &item.HighCount, &item.CriticalCount,
-		&item.ReportMarkdown, &item.ReportJSON, &item.ReportHTML, &item.DocumentJSON,
-		&item.ErrorMessage, &created, &finished,
+		&reportMarkdown, &reportJSON, &reportHTML, &documentJSON,
+		&errorMessage, &created, &finished,
 	); err != nil {
 		return nil, err
 	}
-	item.CreatedAt = parseTime(created.String)
+	if riskLevel.Valid {
+		item.RiskLevel = riskLevel.String
+	}
+	if reportMarkdown.Valid {
+		item.ReportMarkdown = reportMarkdown.String
+	}
+	if reportJSON.Valid {
+		item.ReportJSON = reportJSON.String
+	}
+	if reportHTML.Valid {
+		item.ReportHTML = reportHTML.String
+	}
+	if documentJSON.Valid {
+		item.DocumentJSON = documentJSON.String
+	}
+	if errorMessage.Valid {
+		item.ErrorMessage = errorMessage.String
+	}
+	if created.Valid {
+		item.CreatedAt = parseTime(created.String)
+	}
 	if finished.Valid {
 		item.FinishedAt = parseTime(finished.String)
 	}

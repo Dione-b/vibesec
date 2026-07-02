@@ -145,7 +145,6 @@ Sobe o servidor HTTP com fila de scans assíncronos e agendamento.
 
 - Dashboard: [http://localhost:8080](http://localhost:8080)
 - API base: `http://localhost:8080/api/v1`
-- Na primeira execução, o terminal exibe a **API key do usuário `admin`**
 
 Configuração em `vibesec.yaml`:
 
@@ -156,13 +155,11 @@ enterprise:
   persist_scans: true
 ```
 
-**Autenticação da API:** header `X-API-Key: vs_...` ou `Authorization: Bearer vs_...`
-
-**Endpoints:**
+**Endpoints** (sem autenticação):
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/v1/health` | Health check (sem auth) |
+| `GET` | `/api/v1/health` | Health check |
 | `GET` | `/api/v1/scans` | Listar scans |
 | `POST` | `/api/v1/scans` | Enfileirar scan `{"target":"https://..."}` |
 | `GET` | `/api/v1/scans/{id}` | Detalhe de um scan |
@@ -174,13 +171,11 @@ enterprise:
 ```bash
 # Enfileirar scan
 curl -s -X POST http://localhost:8080/api/v1/scans \
-  -H "X-API-Key: vs_SEU_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"target":"https://example.com"}'
 
 # Listar scans
-curl -s http://localhost:8080/api/v1/scans \
-  -H "X-API-Key: vs_SEU_TOKEN"
+curl -s http://localhost:8080/api/v1/scans
 ```
 
 ### `scans list` — histórico no banco

@@ -12,8 +12,18 @@ const (
 type User struct {
 	ID        int64     `json:"id"`
 	Name      string    `json:"name"`
-	APIKey    string    `json:"api_key,omitempty"`
+	APIKey    string    `json:"-"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserResponse struct {
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (u *User) ToResponse() UserResponse {
+	return UserResponse{ID: u.ID, Name: u.Name, CreatedAt: u.CreatedAt}
 }
 
 type Scan struct {

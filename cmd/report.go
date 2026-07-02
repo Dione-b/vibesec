@@ -25,14 +25,27 @@ var reportCmd = &cobra.Command{
 		fmt.Println()
 		fmt.Printf("Target: %s\n", latest.Target)
 		fmt.Printf("Generated: %s\n\n", latest.Generated.Format("2006-01-02 15:04:05 UTC"))
+
+		fmt.Println("Technical reports:")
 		if latest.Markdown != "" {
-			fmt.Println(latest.Markdown)
+			fmt.Println("  " + latest.Markdown)
 		}
 		if latest.JSON != "" {
-			fmt.Println(latest.JSON)
+			fmt.Println("  " + latest.JSON)
 		}
 		if latest.HTML != "" {
-			fmt.Println(latest.HTML)
+			fmt.Println("  " + latest.HTML)
+		}
+
+		if latest.ExecutiveMarkdown != "" || latest.ExecutiveHTML != "" {
+			fmt.Println()
+			fmt.Println("Executive reports:")
+			if latest.ExecutiveMarkdown != "" {
+				fmt.Println("  " + latest.ExecutiveMarkdown)
+			}
+			if latest.ExecutiveHTML != "" {
+				fmt.Println("  " + latest.ExecutiveHTML)
+			}
 		}
 		return nil
 	},

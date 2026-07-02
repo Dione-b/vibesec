@@ -129,9 +129,11 @@ func Execute(target string, cfg *config.Config, modules []Module, opts Options) 
 	var output *reportengine.Output
 	if ctx.ReportMarkdown != "" || ctx.ReportJSON != "" || ctx.ReportHTML != "" {
 		output = &reportengine.Output{
-			Markdown: ctx.ReportMarkdown,
-			JSON:     ctx.ReportJSON,
-			HTML:     ctx.ReportHTML,
+			Markdown:          ctx.ReportMarkdown,
+			JSON:              ctx.ReportJSON,
+			HTML:              ctx.ReportHTML,
+			ExecutiveMarkdown: ctx.ReportExecutiveMarkdown,
+			ExecutiveHTML:     ctx.ReportExecutiveHTML,
 		}
 	}
 
@@ -172,25 +174,35 @@ func moduleOutput(name string, ctx *scanctx.Context) []string {
 	case "AI Analyzer":
 		return ai.FormatOutput(ctx.AI)
 	case "Report":
-		return formatReportOutput(ctx.ReportMarkdown, ctx.ReportJSON, ctx.ReportHTML)
+		return formatReportOutput(ctx.ReportMarkdown, ctx.ReportJSON, ctx.ReportHTML,
+			ctx.ReportExecutiveMarkdown, ctx.ReportExecutiveHTML)
 	default:
 		return nil
 	}
 }
 
-func formatReportOutput(markdown, jsonPath, htmlPath string) []string {
+func formatReportOutput(markdown, jsonPath, htmlPath, execMarkdown, execHTML string) []string {
 	if markdown == "" && jsonPath == "" && htmlPath == "" {
 		return nil
 	}
-	lines := []string{""}
+	lines := []string{"", "  Technical reports:"}
 	if markdown != "" {
-		lines = append(lines, "  "+markdown)
+		lines = append(lines, "    "+markdown)
 	}
 	if jsonPath != "" {
-		lines = append(lines, "  "+jsonPath)
+		lines = append(lines, "    "+jsonPath)
 	}
 	if htmlPath != "" {
-		lines = append(lines, "  "+htmlPath)
+		lines = append(lines, "    "+htmlPath)
+	}
+	if execMarkdown != "" || execHTML != "" {
+		lines = append(lines, "", "  Executive reports:")
+		if execMarkdown != "" {
+			lines = append(lines, "    "+execMarkdown)
+		}
+		if execHTML != "" {
+			lines = append(lines, "    "+execHTML)
+		}
 	}
 	return lines
 }

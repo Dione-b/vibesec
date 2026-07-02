@@ -30,14 +30,10 @@ var dashboardHTML = []byte(`<!DOCTYPE html>
     <h1>VibeSec Dashboard</h1>
     <p class="muted">Enterprise scan history and scheduling</p>
     <div class="card">
-      <label>API key</label>
-      <div class="row">
-        <input id="apiKey" type="password" placeholder="vs_..." style="flex:1;min-width:240px">
-        <button onclick="loadScans()">Load scans</button>
-      </div>
       <div class="row">
         <input id="target" type="url" placeholder="https://example.com" style="flex:1;min-width:240px">
         <button onclick="enqueueScan()">Enqueue scan</button>
+        <button onclick="loadScans()">Load scans</button>
       </div>
     </div>
     <div class="card">
@@ -50,8 +46,7 @@ var dashboardHTML = []byte(`<!DOCTYPE html>
   </div>
   <script>
     function headers() {
-      const key = document.getElementById('apiKey').value.trim();
-      return key ? { 'X-API-Key': key, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+      return { 'Content-Type': 'application/json' };
     }
     function statusClass(status) {
       return 'pill ' + (status || 'pending');

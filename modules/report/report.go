@@ -15,5 +15,7 @@ func Run(ctx *scanctx.Context) ([]finding.Finding, error) {
 	ctx.ReportMarkdown = output.Markdown
 	ctx.ReportJSON = output.JSON
 	ctx.ReportHTML = output.HTML
+	ctx.ReportExecutiveMarkdown = output.ExecutiveMarkdown
+	ctx.ReportExecutiveHTML = output.ExecutiveHTML
 	return nil, nil
 }

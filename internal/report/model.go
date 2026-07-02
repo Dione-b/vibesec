@@ -54,15 +54,19 @@ type Document struct {
 }
 
 type LatestPointer struct {
-	Target    string    `json:"target"`
-	Generated time.Time `json:"generated_at"`
-	Markdown  string    `json:"markdown,omitempty"`
-	JSON      string    `json:"json,omitempty"`
-	HTML      string    `json:"html,omitempty"`
+	Target            string    `json:"target"`
+	Generated         time.Time `json:"generated_at"`
+	Markdown          string    `json:"markdown,omitempty"`
+	JSON              string    `json:"json,omitempty"`
+	HTML              string    `json:"html,omitempty"`
+	ExecutiveMarkdown string    `json:"executive_markdown,omitempty"`
+	ExecutiveHTML     string    `json:"executive_html,omitempty"`
 }
 
 type Output struct {
-	Markdown string
-	JSON     string
-	HTML     string
+	Markdown          string
+	JSON              string
+	HTML              string
+	ExecutiveMarkdown string
+	ExecutiveHTML     string
 }

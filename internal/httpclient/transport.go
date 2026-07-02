@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
@@ -11,9 +12,14 @@ import (
 )
 
 func buildTransport(opts Options) (http.RoundTripper, error) {
+	tlsCfg := &tls.Config{
+		InsecureSkipVerify: opts.TLSInsecure,
+		MinVersion:         tls.VersionTLS12,
+	}
 	transport := &http.Transport{
 		Proxy:             proxyFunc(opts.ProxyURL),
 		ForceAttemptHTTP2: true,
+		TLSClientConfig:   tlsCfg,
 	}
 	if err := http2.ConfigureTransport(transport); err != nil {
 		return nil, fmt.Errorf("configure http2: %w", err)
@@ -47,6 +53,11 @@ func redirectPolicy(maxRedirects int) func(*http.Request, []*http.Request) error
 	return func(req *http.Request, via []*http.Request) error {
 		if len(via) >= maxRedirects {
 			return fmt.Errorf("stopped after %d redirects", maxRedirects)
+		}
+		originalHost := via[0].URL.Hostname()
+		redirectHost := req.URL.Hostname()
+		if redirectHost != originalHost && !IsAllowedRedirectHost(redirectHost) {
+			return fmt.Errorf("redirect blocked: %s is not allowed", redirectHost)
 		}
 		return nil
 	}

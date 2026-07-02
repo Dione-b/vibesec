@@ -45,6 +45,7 @@ type HTTPConfig struct {
 	MaxRedirects    int    `mapstructure:"max_redirects"`
 	Retries         int    `mapstructure:"retries"`
 	RetryBackoffMS  int    `mapstructure:"retry_backoff_ms"`
+	TLSInsecure     bool   `mapstructure:"tls_insecure"`
 }
 
 type ReportConfig struct {
@@ -52,11 +53,12 @@ type ReportConfig struct {
 }
 
 type EnterpriseConfig struct {
-	Enabled      bool   `mapstructure:"enabled"`
-	Database     string `mapstructure:"database"`
-	APIListen    string `mapstructure:"api_listen"`
-	APIKey       string `mapstructure:"api_key"`
-	PersistScans bool   `mapstructure:"persist_scans"`
+	Enabled        bool     `mapstructure:"enabled"`
+	Database       string   `mapstructure:"database"`
+	APIListen      string   `mapstructure:"api_listen"`
+	APIKey         string   `mapstructure:"api_key"`
+	PersistScans   bool     `mapstructure:"persist_scans"`
+	AllowedOrigins []string `mapstructure:"allowed_origins"`
 }
 
 type ModulesConfig struct {

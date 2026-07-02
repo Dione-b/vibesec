@@ -10,7 +10,6 @@ import (
 	"github.com/dionebastos/vibesec/internal/api"
 	"github.com/dionebastos/vibesec/internal/enterprise"
 	"github.com/dionebastos/vibesec/internal/store"
-	"github.com/dionebastos/vibesec/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -33,20 +32,11 @@ var serveCmd = &cobra.Command{
 		}
 		defer st.Close()
 
-		users, err := st.ListUsers(context.Background())
-		if err != nil {
-			return err
-		}
-		if len(users) > 0 {
-			fmt.Println(ui.Section("VibeSec API"))
-			fmt.Println()
-			fmt.Println("Default API key (admin):")
-			fmt.Println("  " + users[0].APIKey)
-			fmt.Println()
-		}
-
 		service := enterprise.NewService(cfg, st)
-		server := api.NewServer(service)
+		server := api.NewServerWithOrigins(service, cfg.Enterprise.AllowedOrigins)
+		if FrontendHandler != nil {
+			server.SetFrontend(FrontendHandler())
+		}
 		listen := cfg.Enterprise.APIListen
 		if listen == "" {
 			listen = ":8080"

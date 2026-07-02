@@ -6,6 +6,11 @@ reports/*
 vibesec.db
 vibesec.db-*
 
+# frontend
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+
 # secrets & local env
 .env
 .env.*

@@ -73,6 +73,23 @@ func TestClientFollowsRedirects(t *testing.T) {
 	}
 }
 
+func TestClientBlocksSSRFRedirect(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "http://169.254.169.254/latest/meta-data/", http.StatusFound)
+	}))
+	defer server.Close()
+
+	client, err := New(Options{Timeout: 5 * time.Second, MaxRedirects: 5})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = client.Get(context.Background(), server.URL)
+	if err == nil {
+		t.Fatal("expected error for SSRF redirect, got nil")
+	}
+}
+
 func TestClientDecodesGzip(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Encoding", "gzip")

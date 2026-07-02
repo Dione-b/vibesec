@@ -44,9 +44,11 @@ type Context struct {
 	AI              *ai.Result
 	ReconAssets     []ReconAsset
 
-	ReportMarkdown string
-	ReportJSON     string
-	ReportHTML     string
+	ReportMarkdown          string
+	ReportJSON              string
+	ReportHTML              string
+	ReportExecutiveMarkdown string
+	ReportExecutiveHTML     string
 
 	pageOnce sync.Once
 	page     *httpclient.Response

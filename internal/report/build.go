@@ -68,6 +68,7 @@ func Build(ctx *scanctx.Context, modulesRun int) *Document {
 	}
 
 	doc.Findings = append([]finding.Finding(nil), ctx.Findings...)
+	doc.Findings = EnrichFindingsForExecutive(doc.Findings)
 	doc.Summary.FindingCount = len(doc.Findings)
 	doc.Risk = assessRisk(doc.Findings, doc.HeaderChecks)
 	doc.Recommendations = buildRecommendations(doc)

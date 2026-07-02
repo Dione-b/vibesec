@@ -19,6 +19,8 @@ type Finding struct {
 	ASVS           string  `json:"asvs,omitempty"`
 	CAPEC          string  `json:"capec,omitempty"`
 	CVSS           float64 `json:"cvss,omitempty"`
+	LaypersonImpact         string `json:"layperson_impact,omitempty"`
+	LaypersonRecommendation string `json:"layperson_recommendation,omitempty"`
 }
 
 type Options struct {

@@ -30,6 +30,7 @@ func writeToDir(cfg *config.Config, doc *Document, dir string) (*Output, error) 
 
 	stamp := doc.Summary.GeneratedAt.Format("20060102-150405")
 	baseName := fmt.Sprintf("%s-%s", slugTarget(doc.Summary.Target), stamp)
+	execBaseName := baseName + "-executive"
 	output := &Output{}
 
 	if config.HasFormat(cfg.Report.Format, "markdown") {
@@ -39,6 +40,13 @@ func writeToDir(cfg *config.Config, doc *Document, dir string) (*Output, error) 
 			return nil, fmt.Errorf("write markdown: %w", err)
 		}
 		output.Markdown = path
+
+		execPath := filepath.Join(dir, execBaseName+".md")
+		execContent := RenderExecutiveMarkdown(doc)
+		if err := os.WriteFile(execPath, []byte(execContent), 0o644); err != nil {
+			return nil, fmt.Errorf("write executive markdown: %w", err)
+		}
+		output.ExecutiveMarkdown = execPath
 	}
 
 	if config.HasFormat(cfg.Report.Format, "json") {
@@ -60,6 +68,13 @@ func writeToDir(cfg *config.Config, doc *Document, dir string) (*Output, error) 
 			return nil, fmt.Errorf("write html: %w", err)
 		}
 		output.HTML = path
+
+		execPath := filepath.Join(dir, execBaseName+".html")
+		execContent := RenderExecutiveHTML(doc)
+		if err := os.WriteFile(execPath, []byte(execContent), 0o644); err != nil {
+			return nil, fmt.Errorf("write executive html: %w", err)
+		}
+		output.ExecutiveHTML = execPath
 	}
 
 	if output.Markdown == "" && output.JSON == "" && output.HTML == "" {
@@ -67,11 +82,13 @@ func writeToDir(cfg *config.Config, doc *Document, dir string) (*Output, error) 
 	}
 
 	pointer := LatestPointer{
-		Target:    doc.Summary.Target,
-		Generated: doc.Summary.GeneratedAt,
-		Markdown:  output.Markdown,
-		JSON:      output.JSON,
-		HTML:      output.HTML,
+		Target:            doc.Summary.Target,
+		Generated:         doc.Summary.GeneratedAt,
+		Markdown:          output.Markdown,
+		JSON:              output.JSON,
+		HTML:              output.HTML,
+		ExecutiveMarkdown: output.ExecutiveMarkdown,
+		ExecutiveHTML:     output.ExecutiveHTML,
 	}
 	data, err := json.MarshalIndent(pointer, "", "  ")
 	if err != nil {
@@ -106,6 +123,19 @@ func slugTarget(target string) string {
 	target = strings.TrimSuffix(target, "/")
 	target = strings.ReplaceAll(target, "/", "-")
 	target = strings.ReplaceAll(target, ":", "-")
+	target = strings.ReplaceAll(target, "..", "-")
+	target = strings.ReplaceAll(target, "~", "-")
+	var b strings.Builder
+	for _, r := range target {
+		if r >= 'a' && r <= 'z' || r >= '0' && r <= '9' || r == '-' || r == '.' {
+			b.WriteRune(r)
+		} else if r >= 'A' && r <= 'Z' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune('-')
+		}
+	}
+	target = strings.Trim(b.String(), "-.")
 	if target == "" {
 		return "target"
 	}
@@ -117,17 +147,29 @@ func FormatOutput(output *Output) []string {
 		return nil
 	}
 	var lines []string
-	if output.Markdown != "" {
-		lines = append(lines, "  "+output.Markdown)
+
+	if output.Markdown != "" || output.JSON != "" || output.HTML != "" {
+		lines = append(lines, "", "  Technical reports:")
+		if output.Markdown != "" {
+			lines = append(lines, "    "+output.Markdown)
+		}
+		if output.JSON != "" {
+			lines = append(lines, "    "+output.JSON)
+		}
+		if output.HTML != "" {
+			lines = append(lines, "    "+output.HTML)
+		}
 	}
-	if output.JSON != "" {
-		lines = append(lines, "  "+output.JSON)
+
+	if output.ExecutiveMarkdown != "" || output.ExecutiveHTML != "" {
+		lines = append(lines, "", "  Executive reports:")
+		if output.ExecutiveMarkdown != "" {
+			lines = append(lines, "    "+output.ExecutiveMarkdown)
+		}
+		if output.ExecutiveHTML != "" {
+			lines = append(lines, "    "+output.ExecutiveHTML)
+		}
 	}
-	if output.HTML != "" {
-		lines = append(lines, "  "+output.HTML)
-	}
-	if len(lines) == 0 {
-		return nil
-	}
-	return append([]string{""}, lines...)
+
+	return lines
 }

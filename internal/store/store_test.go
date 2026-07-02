@@ -36,6 +36,14 @@ func TestStoreCreateAndListScans(t *testing.T) {
 		t.Fatalf("unexpected id %s", scan.ID)
 	}
 
+	fetched, err := s.GetScan(ctx, id)
+	if err != nil {
+		t.Fatalf("get pending scan: %v", err)
+	}
+	if fetched.Status != ScanStatusPending {
+		t.Fatalf("unexpected status %s", fetched.Status)
+	}
+
 	if err := s.UpdateScan(ctx, id, UpdateScanInput{
 		Status:       ScanStatusCompleted,
 		RiskLevel:    "high",

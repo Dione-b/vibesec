@@ -15,6 +15,7 @@ type Options struct {
 	MaxRedirects int
 	Retries      int
 	RetryBackoff time.Duration
+	TLSInsecure  bool
 }
 
 func OptionsFromConfig(cfg *config.Config) Options {
@@ -28,6 +29,7 @@ func OptionsFromConfig(cfg *config.Config) Options {
 		MaxRedirects: cfg.HTTP.MaxRedirects,
 		Retries:      cfg.HTTP.Retries,
 		RetryBackoff: time.Duration(cfg.HTTP.RetryBackoffMS) * time.Millisecond,
+		TLSInsecure:  cfg.HTTP.TLSInsecure,
 	}
 	opts.applyDefaults()
 	return opts
