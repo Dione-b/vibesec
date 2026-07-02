@@ -110,6 +110,9 @@ func Execute(target string, cfg *config.Config, modules []Module, opts Options) 
 		}
 	}
 
+	filterCtx := ctx.BuildFilterContext()
+	ctx.Findings = finding.FilterLowConfidence(finding.ScoreAll(ctx.Findings, filterCtx))
+
 	summary := finding.Summarize(ctx.Findings)
 	if writer != nil {
 		lines = append(lines, "")

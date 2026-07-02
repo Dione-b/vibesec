@@ -1,13 +1,14 @@
-.PHONY: all build frontend backend clean dev dev-frontend dev-backend test lint install
+.PHONY: all build frontend backend clean dev dev-stop dev-frontend dev-backend test lint install
 
 all: build
 
 dev:
-	@echo "Iniciando backend (port 8080)..."
-	@go run . serve &
-	@sleep 2
-	@echo "Iniciando frontend (port 5173)..."
-	@cd frontend && npm run dev
+	@chmod +x scripts/dev.sh
+	@./scripts/dev.sh
+
+dev-stop:
+	@chmod +x scripts/dev-stop.sh
+	@./scripts/dev-stop.sh
 
 frontend:
 	cd frontend && npm run build

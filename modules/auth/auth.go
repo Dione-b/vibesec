@@ -37,6 +37,7 @@ func Run(ctx *scanctx.Context) ([]finding.Finding, error) {
 	}
 	if ctx.Bundle != nil {
 		input.BundleLibraries = append([]string(nil), ctx.Bundle.Libraries...)
+		input.BundleContent = ctx.Bundle.CombinedContent
 	}
 
 	result := auth.Analyze(input)

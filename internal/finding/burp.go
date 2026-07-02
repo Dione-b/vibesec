@@ -30,6 +30,7 @@ func FromBurp(issues []BurpIssue) []Finding {
 			Module:         ModuleBurp,
 			ID:             slug(issue.Name) + "-" + fmt.Sprintf("%d", i),
 			Severity:       mapBurpSeverity(issue.Severity),
+			Confidence:     ConfidenceLow,
 			Title:          issue.Name,
 			Description:    issue.Detail,
 			Evidence:       evidence,

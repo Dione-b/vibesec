@@ -6,6 +6,9 @@ import StatusBadge from "../components/StatusBadge";
 import RiskBadge from "../components/RiskBadge";
 import ReportExecutive from "../components/ReportExecutive";
 import ReportTechnical from "../components/ReportTechnical";
+import ReportCard from "../components/report/ReportCard";
+import { ReportContentSkeleton, ReportPageSkeleton } from "../components/ReportSkeleton";
+import { downloadTechnicalReportJSON } from "../lib/export-report";
 
 type Tab = "executive" | "technical";
 
@@ -15,11 +18,7 @@ export default function Report() {
   const [tab, setTab] = useState<Tab>("executive");
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-muted">Carregando relatório...</div>
-      </div>
-    );
+    return <ReportPageSkeleton />;
   }
 
   if (error || !scan) {
@@ -37,35 +36,25 @@ export default function Report() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
           <StatusBadge status={scan.status} />
           {scan.risk_level && <RiskBadge level={scan.risk_level} />}
         </div>
-        <h1 className="text-2xl font-bold text-text truncate">{scan.target}</h1>
-        <p className="text-muted text-sm mt-1">
+        <h1 className="text-xl sm:text-2xl font-bold text-text truncate">{scan.target}</h1>
+        <p className="text-muted text-xs sm:text-sm mt-1">
           {new Date(scan.created_at).toLocaleString("pt-BR")}
           {scan.finished_at && ` — ${new Date(scan.finished_at).toLocaleString("pt-BR")}`}
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
         <StatCard label="Findings" value={scan.finding_count} />
         <StatCard label="High" value={scan.high_count} accent="text-orange-400" />
         <StatCard label="Critical" value={scan.critical_count} accent="text-red-400" />
       </div>
 
       {scan.status === "pending" || scan.status === "running" ? (
-        <div className="text-center py-16">
-          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-panel border border-border">
-            <span className="relative flex h-3 w-3">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 animate-ping" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-accent" />
-            </span>
-            <span className="text-muted">
-              {scan.status === "pending" ? "Na fila..." : "Escaneando..."}
-            </span>
-          </div>
-        </div>
+        <ReportContentSkeleton />
       ) : scan.status === "failed" ? (
         <div className="text-center py-16">
           <p className="text-red-400 mb-2">Scan falhou</p>
@@ -75,14 +64,27 @@ export default function Report() {
         </div>
       ) : doc ? (
         <>
-          <div className="flex gap-1 mb-6 bg-panel border border-border rounded-xl p-1 w-fit">
-            <TabButton active={tab === "executive"} onClick={() => setTab("executive")}>
-              Empresarial
-            </TabButton>
-            <TabButton active={tab === "technical"} onClick={() => setTab("technical")}>
-              Técnico
-            </TabButton>
-          </div>
+          <ReportCard className="!p-1.5 mb-6">
+            <div className="flex w-full flex-col sm:flex-row gap-2 sm:items-center">
+              <div className="flex w-full gap-1">
+                <TabButton active={tab === "executive"} onClick={() => setTab("executive")}>
+                  Empresarial
+                </TabButton>
+                <TabButton active={tab === "technical"} onClick={() => setTab("technical")}>
+                  Técnico
+                </TabButton>
+              </div>
+              {tab === "technical" ? (
+                <button
+                  type="button"
+                  onClick={() => downloadTechnicalReportJSON(doc, scan.target)}
+                  className="shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium border border-accent/30 bg-accent/10 text-accent hover:bg-accent/15 transition-colors"
+                >
+                  Exportar JSON
+                </button>
+              ) : null}
+            </div>
+          </ReportCard>
 
           <div className="min-h-[40vh]">
             {tab === "executive" ? (
@@ -111,10 +113,10 @@ function TabButton({
   return (
     <button
       onClick={onClick}
-      className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
+      className={`flex-1 text-center px-5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
         active
-          ? "bg-accent/15 text-accent border border-accent/30"
-          : "text-muted hover:text-text border border-transparent"
+          ? "bg-accent/15 text-accent border border-accent/30 shadow-sm"
+          : "text-muted hover:text-text border border-transparent hover:bg-bg/40"
       }`}
     >
       {children}

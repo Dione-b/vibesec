@@ -64,6 +64,7 @@ func FromBundle(result *BundleSnapshot) []Finding {
 			Module:         ModuleBundle,
 			ID:             fmt.Sprintf("secret-%d", i+1),
 			Severity:       SeverityHigh,
+			Confidence:     ConfidenceHigh,
 			Title:          "Possible secret in bundle",
 			Description:    "A hardcoded secret-like value was found in JavaScript sources.",
 			Evidence:       secret,
@@ -96,7 +97,10 @@ type EndpointProbe struct {
 	Status int
 }
 
-func FromEndpoints(probes []EndpointProbe) []Finding {
+func FromEndpoints(probes []EndpointProbe, spaDetected bool) []Finding {
+	if spaDetected {
+		return nil
+	}
 	var findings []Finding
 	for _, probe := range probes {
 		if probe.Method != "GET" || probe.Status >= 400 {

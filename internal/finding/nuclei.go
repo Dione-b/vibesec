@@ -21,6 +21,7 @@ func FromNuclei(items []NucleiItem) []Finding {
 			Module:      ModuleNuclei,
 			ID:          slug(item.TemplateID) + "-" + fmt.Sprintf("%d", i),
 			Severity:    mapNucleiSeverity(item.Severity),
+			Confidence:  ConfidenceLow,
 			Title:       item.Name,
 			Description: "Nuclei template match",
 			Evidence:    item.Matched,

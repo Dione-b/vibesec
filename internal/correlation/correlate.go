@@ -38,6 +38,10 @@ func FromContext(ctx *scanctx.Context) Snapshot {
 	}
 }
 
+func spaDetected(s Snapshot) bool {
+	return s.Endpoints != nil && s.Endpoints.SPADetected
+}
+
 func Analyze(s Snapshot) []finding.Finding {
 	var out []finding.Finding
 	seen := make(map[string]struct{})
@@ -52,8 +56,12 @@ func Analyze(s Snapshot) []finding.Finding {
 
 	reachable := reachableGET(s.Endpoints)
 	loginPaths := loginReachable(s.Auth, reachable)
+	spa := spaDetected(s)
 
 	for _, admin := range adminReferences(s.Bundle) {
+		if spa {
+			continue
+		}
 		for path, probe := range reachable {
 			if !pathsRelated(admin, path) {
 				continue
@@ -356,9 +364,22 @@ func pathsRelated(a, b string) bool {
 	if a == b {
 		return true
 	}
-	return strings.HasSuffix(b, a) || strings.HasSuffix(a, b) ||
-		strings.Contains(strings.ToLower(b), strings.ToLower(a)) ||
-		strings.Contains(strings.ToLower(a), strings.ToLower(b))
+	return hasPathPrefix(b, a) || hasPathPrefix(a, b)
+}
+
+func hasPathPrefix(path, prefix string) bool {
+	path = normalizePath(path)
+	prefix = normalizePath(prefix)
+	if prefix == "/" || prefix == "" {
+		return false
+	}
+	if !strings.HasPrefix(path, prefix) {
+		return false
+	}
+	if len(path) == len(prefix) {
+		return true
+	}
+	return path[len(prefix)] == '/'
 }
 
 func findingSlug(value string) string {

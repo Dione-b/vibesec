@@ -31,8 +31,8 @@ type EndpointProbe struct {
 }
 
 var (
-	jwtPattern      = regexp.MustCompile(`(?i)jwt\.decode|jsonwebtoken|Bearer\s+[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+`)
-	rolePattern     = regexp.MustCompile(`(?i)(isAdmin|userRole|role\s*===|role\s*==|checkRole|hasRole)`)
+	jwtPattern      = regexp.MustCompile(`(?i)jwt\.decode|jsonwebtoken|Bearer\s+[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+`)
+	rolePattern     = regexp.MustCompile(`(?i)(isAdmin|userRole|checkRole|hasRole)`)
 	oauthPattern    = regexp.MustCompile(`(?i)oauth|openid-connect|oidc|next-auth|auth0`)
 	csrfPattern     = regexp.MustCompile(`(?i)csrf|xsrf|_token|csrftoken`)
 	localJWTStorage = regexp.MustCompile(`(?i)localStorage\.(setItem|getItem)\s*\(\s*['"](?:token|jwt|access_token)`)
@@ -164,24 +164,21 @@ func analyzeCookies(cookies []Cookie, isHTTPS bool) []Signal {
 
 func looksLikeSessionCookie(name string) bool {
 	lower := strings.ToLower(name)
-	return strings.Contains(lower, "session") ||
-		lower == "connect.sid" ||
-		strings.Contains(lower, "auth") ||
-		strings.Contains(lower, "token")
+	return strings.Contains(lower, "session") || lower == "connect.sid"
 }
 
 func analyzeJWT(body string) []Signal {
-	if !jwtPattern.MatchString(body) {
+	if !localJWTStorage.MatchString(body) {
+		if jwtPattern.MatchString(body) {
+			return []Signal{{Category: "JWT", Status: StatusInfo, Detail: "JWT library references found without localStorage storage pattern"}}
+		}
 		return []Signal{{Category: "JWT", Status: StatusInfo, Detail: "no JWT usage detected in client code"}}
 	}
-	if localJWTStorage.MatchString(body) {
-		return []Signal{{
-			Category: "JWT",
-			Status:   StatusWarning,
-			Detail:   "JWT may be stored in localStorage",
-		}}
-	}
-	return []Signal{{Category: "JWT", Status: StatusPass, Detail: "JWT references found without localStorage storage pattern"}}
+	return []Signal{{
+		Category: "JWT",
+		Status:   StatusWarning,
+		Detail:   "JWT may be stored in localStorage",
+	}}
 }
 
 func analyzeCSRF(body string, cookies []Cookie) []Signal {

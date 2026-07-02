@@ -20,14 +20,15 @@ func Analyze(target string, resp *httpclient.Response, checkCORS bool) (*Result,
 	}
 
 	isHTTPS := parsed.Scheme == "https"
+	isDev := isDevTarget(parsed)
 	headers := resp.Headers
 	cookies := resp.Headers.Values("Set-Cookie")
 
 	result := &Result{
 		Checks: []Check{
 			checkHSTS(headers, isHTTPS),
-			checkCSP(headers),
-			checkXFO(headers),
+			checkCSP(headers, isDev),
+			checkXFO(headers, isDev),
 			checkReferrerPolicy(headers),
 			checkPermissionsPolicy(headers),
 			checkCacheControl(headers),
@@ -46,7 +47,7 @@ func Analyze(target string, resp *httpclient.Response, checkCORS bool) (*Result,
 func checkHSTS(headers http.Header, isHTTPS bool) Check {
 	value := strings.TrimSpace(headers.Get("Strict-Transport-Security"))
 	if !isHTTPS {
-		return Check{Name: "HSTS", Status: StatusWarning, Detail: "target is not HTTPS"}
+		return Check{Name: "HSTS", Status: StatusInfo, Detail: "target is not HTTPS"}
 	}
 	if value == "" {
 		return Check{
@@ -68,12 +69,16 @@ func checkHSTS(headers http.Header, isHTTPS bool) Check {
 	return Check{Name: "HSTS", Status: StatusPass, Detail: value}
 }
 
-func checkCSP(headers http.Header) Check {
+func checkCSP(headers http.Header, isDev bool) Check {
 	value := strings.TrimSpace(firstHeader(headers, "Content-Security-Policy", "Content-Security-Policy-Report-Only"))
 	if value == "" {
+		status := StatusFail
+		if isDev {
+			status = StatusWarning
+		}
 		return Check{
 			Name:   "CSP",
-			Status: StatusFail,
+			Status: status,
 			Detail: "Content-Security-Policy header missing",
 		}
 	}
@@ -90,13 +95,17 @@ func checkCSP(headers http.Header) Check {
 	return Check{Name: "CSP", Status: StatusPass, Detail: truncate(value, 80)}
 }
 
-func checkXFO(headers http.Header) Check {
+func checkXFO(headers http.Header, isDev bool) Check {
 	value := strings.TrimSpace(headers.Get("X-Frame-Options"))
 	csp := strings.ToLower(headers.Get("Content-Security-Policy"))
 	if value == "" && !strings.Contains(csp, "frame-ancestors") {
+		status := StatusFail
+		if isDev {
+			status = StatusWarning
+		}
 		return Check{
 			Name:   "XFO",
-			Status: StatusFail,
+			Status: status,
 			Detail: "X-Frame-Options and frame-ancestors missing",
 		}
 	}
@@ -201,7 +210,7 @@ func checkRateLimit(headers http.Header) []Check {
 	if len(found) == 0 {
 		return []Check{{
 			Name:   "Rate Limit",
-			Status: StatusWarning,
+			Status: StatusInfo,
 			Detail: "no rate limit headers detected",
 		}}
 	}
@@ -297,4 +306,16 @@ func truncate(value string, max int) string {
 		return value
 	}
 	return value[:max] + "..."
+}
+
+func isDevTarget(parsed *url.URL) bool {
+	if parsed == nil {
+		return false
+	}
+	host := strings.ToLower(parsed.Hostname())
+	return host == "localhost" ||
+		host == "127.0.0.1" ||
+		strings.HasSuffix(host, ".local") ||
+		strings.HasSuffix(host, ".test") ||
+		strings.HasSuffix(host, ".localhost")
 }

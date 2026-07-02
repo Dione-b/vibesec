@@ -4,6 +4,7 @@ const (
 	StatusPass    = "PASS"
 	StatusFail    = "FAIL"
 	StatusWarning = "WARNING"
+	StatusInfo    = "INFO"
 )
 
 type Check struct {

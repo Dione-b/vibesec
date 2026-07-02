@@ -10,6 +10,7 @@ type Input struct {
 	AdminPages     []string
 	EndpointProbes []EndpointProbe
 	BundleContent  string
+	SPADetected    bool
 }
 
 type EndpointProbe struct {
@@ -22,7 +23,7 @@ var (
 	idorPathPattern = regexp.MustCompile(`(?i)/(?:users|accounts|orders|invoices|profile)/\{?[:\w]*id\}?`)
 	idorNumeric     = regexp.MustCompile(`(?i)/(?:users|accounts)/\d+`)
 	massAssign      = regexp.MustCompile(`(?i)(mass.?assign|req\.body|Object\.assign\([^)]*user)`)
-	roleBypass      = regexp.MustCompile(`(?i)(isAdmin|role\s*===\s*['"]admin['"]|bypass.*auth)`)
+	roleBypass      = regexp.MustCompile(`(?i)(isAdmin\s*&&\s*bypass|bypass.*auth|role\s*===\s*['"]admin['"].*bypass)`)
 )
 
 func Analyze(in Input) *Result {
@@ -48,7 +49,7 @@ func Analyze(in Input) *Result {
 	result.Signals = append(result.Signals, analyzeIDOR(body, result.IDORCandidates)...)
 	result.Signals = append(result.Signals, analyzeMassAssignment(body)...)
 	result.Signals = append(result.Signals, analyzeRoleBypass(body)...)
-	result.Signals = append(result.Signals, analyzeVertical(result.AdminPaths, in.EndpointProbes)...)
+	result.Signals = append(result.Signals, analyzeVertical(result.AdminPaths, in.EndpointProbes, in.SPADetected)...)
 
 	return result
 }
@@ -104,7 +105,10 @@ func analyzeRoleBypass(body string) []Signal {
 	return []Signal{{Category: "Role bypass", Status: StatusPass, Detail: "no client-side role bypass patterns"}}
 }
 
-func analyzeVertical(adminPaths []string, probes []EndpointProbe) []Signal {
+func analyzeVertical(adminPaths []string, probes []EndpointProbe, spaDetected bool) []Signal {
+	if spaDetected {
+		return []Signal{{Category: "Vertical escalation", Status: StatusPass, Detail: "SPA fallback detected; admin 200 responses ignored"}}
+	}
 	for _, path := range adminPaths {
 		for _, probe := range probes {
 			if probe.Path == path && probe.Method == http.MethodGet && probe.Status == 200 {

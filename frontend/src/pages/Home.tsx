@@ -22,12 +22,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 relative">
       <div className="text-center mb-10">
-        <h1 className="text-5xl font-bold tracking-tight text-text">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-text">
           Vibe<span className="text-accent">Sec</span>
         </h1>
-        <p className="text-muted mt-3 text-lg">Security reconnaissance para aplicações web</p>
+        <p className="text-muted mt-3 text-base sm:text-lg">Security reconnaissance para aplicações web</p>
       </div>
 
       {target ? (

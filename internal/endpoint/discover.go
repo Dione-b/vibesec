@@ -3,6 +3,8 @@ package endpoint
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -62,6 +64,7 @@ func Discover(ctx context.Context, target string, bundleResult *bundle.Result, c
 		}
 		return result.Matrix[i].Path < result.Matrix[j].Path
 	})
+	result.SPADetected = DetectSPAFallback(result.Matrix)
 	return result, nil
 }
 
@@ -153,6 +156,14 @@ func probePath(ctx context.Context, client *httpclient.Client, base *url.URL, pa
 			Method: method,
 			Status: resp.StatusCode,
 		}
+		if method == http.MethodGet && resp.StatusCode >= 200 && resp.StatusCode < 400 {
+			body := resp.Body
+			if len(body) > 512 {
+				body = body[:512]
+			}
+			probe.ContentLength = len(resp.Body)
+			probe.ContentHash = hashContent(body)
+		}
 		if method == http.MethodOptions {
 			probe.AllowedMethods = resp.Headers.Get("Allow")
 			if probe.AllowedMethods == "" {
@@ -162,4 +173,12 @@ func probePath(ctx context.Context, client *httpclient.Client, base *url.URL, pa
 		probes = append(probes, probe)
 	}
 	return probes
+}
+
+func hashContent(body []byte) string {
+	if len(body) == 0 {
+		return ""
+	}
+	sum := sha256.Sum256(body)
+	return hex.EncodeToString(sum[:8])
 }

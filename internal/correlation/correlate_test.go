@@ -110,7 +110,13 @@ func TestPathsRelated(t *testing.T) {
 	if !pathsRelated("/admin", "/admin") {
 		t.Fatal("expected exact match")
 	}
-	if !pathsRelated("admin", "/panel/admin") {
-		t.Fatal("expected suffix match")
+	if !pathsRelated("/admin", "/admin/users") {
+		t.Fatal("expected prefix match")
+	}
+	if pathsRelated("/admin", "/api/admin-panel") {
+		t.Fatal("expected unrelated paths to not match")
+	}
+	if pathsRelated("admin", "/panel/admin") {
+		t.Fatal("expected substring-only match to be rejected")
 	}
 }

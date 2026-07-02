@@ -23,5 +23,5 @@ func Run(ctx *scanctx.Context) ([]finding.Finding, error) {
 			Status: probe.Status,
 		}
 	}
-	return finding.FromEndpoints(probes), nil
+	return finding.FromEndpoints(probes, result.SPADetected), nil
 }

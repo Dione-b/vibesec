@@ -15,7 +15,6 @@ import (
 
 	"github.com/dionebastos/vibesec/internal/enterprise"
 	"github.com/dionebastos/vibesec/internal/httpclient"
-	"github.com/dionebastos/vibesec/internal/report"
 	"github.com/dionebastos/vibesec/internal/store"
 )
 
@@ -63,6 +62,7 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /api/v1/scans", s.handleListScans)
 	s.mux.HandleFunc("POST /api/v1/scans", s.handleCreateScan)
 	s.mux.HandleFunc("GET /api/v1/scans/{id}", s.handleGetScan)
+	s.mux.HandleFunc("GET /api/v1/scans/{id}/events", s.handleScanEvents)
 	s.mux.HandleFunc("GET /api/v1/schedules", s.handleListSchedules)
 	s.mux.HandleFunc("POST /api/v1/schedules", s.handleCreateSchedule)
 }
@@ -112,11 +112,7 @@ func (s *Server) handleGetScan(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, errors.New("failed to load scan"))
 		return
 	}
-	if item.DocumentJSON != "" {
-		if enriched, err := report.EnrichDocumentJSON(item.DocumentJSON); err == nil {
-			item.DocumentJSON = enriched
-		}
-	}
+	enrichScanDocument(item)
 	writeJSON(w, http.StatusOK, item)
 }
 
@@ -259,7 +255,7 @@ func (rl *rateLimiter) Allow(key string) bool {
 
 func (s *Server) withRateLimit(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/health" {
+		if r.URL.Path == "/api/v1/health" || strings.HasSuffix(r.URL.Path, "/events") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -301,7 +297,7 @@ func (s *Server) withCORS(next http.Handler) http.Handler {
 				w.Header().Set("Access-Control-Allow-Origin", s.allowedOrigins[0])
 			}
 		}
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Last-Event-ID")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Credentials", "false")
 		if r.Method == http.MethodOptions {

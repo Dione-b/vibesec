@@ -64,7 +64,7 @@ type HeaderCheck struct {
 func FromHeaderChecks(checks []HeaderCheck) []Finding {
 	var findings []Finding
 	for _, check := range checks {
-		if check.Status == "PASS" {
+		if check.Status == "PASS" || check.Status == "INFO" {
 			continue
 		}
 		key := slug(check.Name)

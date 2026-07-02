@@ -35,6 +35,7 @@ func Analyze(ctx context.Context, target string, page *httpclient.Response, clie
 	result := &Result{}
 	seen := make(map[string]struct{})
 
+	result.CombinedContent = string(page.Body)
 	scanContent(string(page.Body), result, seen)
 
 	scriptURLs, err := extractScriptURLs(base, page.Body)
@@ -51,6 +52,7 @@ func Analyze(ctx context.Context, target string, page *httpclient.Response, clie
 		if err != nil {
 			continue
 		}
+		result.CombinedContent += "\n" + body
 		scanContent(body, result, seen)
 	}
 

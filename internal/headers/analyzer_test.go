@@ -55,6 +55,29 @@ func TestAnalyzeStrongSecurityHeaders(t *testing.T) {
 	}
 }
 
+func TestAnalyzeHTTPHSTSInfo(t *testing.T) {
+	headers := http.Header{}
+	resp := &httpclient.Response{StatusCode: 200, Headers: headers, URL: "http://localhost:3000"}
+	result, err := Analyze("http://localhost:3000", resp, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertCheck(t, result, "HSTS", StatusInfo)
+}
+
+func TestAnalyzeRateLimitInfo(t *testing.T) {
+	headers := http.Header{}
+	headers.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+	headers.Set("Content-Security-Policy", "default-src 'self'")
+	headers.Set("X-Frame-Options", "DENY")
+	resp := &httpclient.Response{StatusCode: 200, Headers: headers, URL: "https://secure.example.com"}
+	result, err := Analyze("https://secure.example.com", resp, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertCheck(t, result, "Rate Limit", StatusInfo)
+}
+
 func assertCheck(t *testing.T, result *Result, name, want string) {
 	t.Helper()
 	for _, check := range result.Checks {

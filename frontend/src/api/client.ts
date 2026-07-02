@@ -30,6 +30,10 @@ export async function getScan(id: string): Promise<Scan> {
   return request(`/scans/${id}`);
 }
 
+export function scanEventsUrl(id: string): string {
+  return `${BASE}/scans/${id}/events`;
+}
+
 export async function createScan(target: string): Promise<Scan> {
   return request("/scans", {
     method: "POST",

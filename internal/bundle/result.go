@@ -1,12 +1,13 @@
 package bundle
 
 type Result struct {
-	Scripts    []string `json:"scripts,omitempty"`
-	Libraries  []string `json:"libraries,omitempty"`
-	Routes     []string `json:"routes,omitempty"`
-	Endpoints  []string `json:"endpoints,omitempty"`
-	AdminPages []string `json:"admin_pages,omitempty"`
-	Secrets    []string `json:"secrets,omitempty"`
+	Scripts         []string `json:"scripts,omitempty"`
+	Libraries       []string `json:"libraries,omitempty"`
+	Routes          []string `json:"routes,omitempty"`
+	Endpoints       []string `json:"endpoints,omitempty"`
+	AdminPages      []string `json:"admin_pages,omitempty"`
+	Secrets         []string `json:"secrets,omitempty"`
+	CombinedContent string   `json:"-"`
 }
 
 func (r *Result) RouteCount() int {

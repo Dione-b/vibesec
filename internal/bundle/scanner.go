@@ -81,7 +81,7 @@ func scanContent(content string, result *Result, seen map[string]struct{}) {
 		}
 	}
 	for _, match := range secretPattern.FindAllStringSubmatch(content, 10) {
-		if len(match) > 1 {
+		if len(match) > 1 && IsLikelySecret(match[1]) {
 			addUnique(&result.Secrets, redactSecret(match[1]))
 		}
 	}

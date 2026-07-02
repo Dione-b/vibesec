@@ -10,8 +10,10 @@ func Run(ctx *scanctx.Context) ([]finding.Finding, error) {
 	input := authz.Input{}
 	if ctx.Bundle != nil {
 		input.AdminPages = append([]string(nil), ctx.Bundle.AdminPages...)
+		input.BundleContent = ctx.Bundle.CombinedContent
 	}
 	if ctx.Endpoints != nil {
+		input.SPADetected = ctx.Endpoints.SPADetected
 		for _, probe := range ctx.Endpoints.Matrix {
 			input.EndpointProbes = append(input.EndpointProbes, authz.EndpointProbe{
 				Path:   probe.Path,

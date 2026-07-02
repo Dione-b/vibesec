@@ -8,26 +8,20 @@ import (
 )
 
 func assessRisk(findings []finding.Finding, checks []headers.Check) Risk {
+	_ = checks
 	counts := map[string]int{
-		"high":   0,
-		"medium": 0,
-		"low":    0,
-		"info":   0,
+		"critical": 0,
+		"high":     0,
+		"medium":   0,
+		"low":      0,
+		"info":     0,
 	}
 
 	for _, item := range findings {
 		counts[normalizeSeverity(item.Severity)]++
 	}
-	for _, check := range checks {
-		switch check.Status {
-		case headers.StatusFail:
-			counts["high"]++
-		case headers.StatusWarning:
-			counts["medium"]++
-		}
-	}
 
-	score := counts["high"]*10 + counts["medium"]*5 + counts["low"]*2
+	score := counts["critical"]*15 + counts["high"]*10 + counts["medium"]*5 + counts["low"]*2
 	level := "low"
 	switch {
 	case score >= 30:

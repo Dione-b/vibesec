@@ -7,11 +7,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       {!isHome && (
-        <header className="border-b border-border px-6 py-3 flex items-center gap-4">
+        <header className="border-b border-border px-4 sm:px-6 py-3 flex items-center gap-4">
           <Link to="/" className="text-accent font-bold text-lg tracking-tight hover:opacity-80 transition-opacity">
             VibeSec
           </Link>
-          <span className="text-muted text-sm">Security Recon</span>
+          <span className="text-muted text-sm hidden sm:inline">Security Recon</span>
         </header>
       )}
       <main className="flex-1">{children}</main>
